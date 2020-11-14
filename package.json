@@ -1,0 +1,11 @@
+{
+  "name": "fmo-mgmt-backend",
+  "version": "1.0.0",
+  "description": "Fleet Menu Ordering Management Backend Application",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "asilter",
+  "license": "ISC"
+}
