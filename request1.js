@@ -26,7 +26,7 @@ const req = https.request(options, res => {
         console.log(totalData.length);
         const fs = require('fs');
         
-        fs.writeFile("/tmp/tripadvisor.html", totalData, function (err) {
+        fs.writeFile("/Users/asilter/Documents/WORK/PROJECTS/fleet-menu-order/fmo-mgmt/source-code/fmo-mgmt-backend/assets/data/tripadvisor.html", totalData, function (err) {
             if (err) {
                 return console.log(err);
             }
