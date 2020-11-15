@@ -1,0 +1,11 @@
+[
+    {
+        "name": "ABC Restaurant",
+        "email": "abc@abc.com",
+        "location": "London"
+    },{
+        "name": "XYZ Restaurant",
+        "email": "xyz@xyz.com",
+        "location": "London"
+    }
+]

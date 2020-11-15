@@ -1,12 +1,10 @@
 //const https = require('http')
 const https = require('https')
+const config = require('./config/config.json');
 
 const options = {
-    //hostname: 'example.com',
     hostname: 'www.tripadvisor.com',
-    //port: 80,
     port: 443,
-    //path: '/',
     path: '/Restaurants-g186338-London_England.html',
     method: 'GET',
     headers: {
@@ -26,7 +24,7 @@ const req = https.request(options, res => {
         console.log(totalData.length);
         const fs = require('fs');
         
-        fs.writeFile("/Users/asilter/Documents/WORK/PROJECTS/fleet-menu-order/fmo-mgmt/source-code/fmo-mgmt-backend/assets/data/tripadvisor.html", totalData, function (err) {
+        fs.writeFile(config.DEV.web_response_TA_tmp_file, totalData, function (err) {
             if (err) {
                 return console.log(err);
             }
