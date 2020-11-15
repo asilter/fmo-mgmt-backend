@@ -13,6 +13,8 @@ const options = {
 };
 
 var totalData = "";
+const req;
+
 const req = https.request(options, res => {
     console.log("statusCode:" + res.statusCode);
     res.on('data', d => {
@@ -78,6 +80,7 @@ const req = https.request(options, res => {
         
     })
 });
+
 
 req.on('error', error => {
     console.log("Failed!");
