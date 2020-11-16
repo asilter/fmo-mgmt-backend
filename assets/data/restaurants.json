@@ -1,11 +1,14 @@
 [
     {
         "name": "ABC Restaurant",
+        "address": "123 London",
         "email": "abc@abc.com",
-        "location": "London"
-    },{
+        "phone": "+44 123 1345"
+    },
+    {
         "name": "XYZ Restaurant",
+        "address": "765 London",
         "email": "xyz@xyz.com",
-        "location": "London"
+        "phone": "+44 765 1793"
     }
 ]
