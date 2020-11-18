@@ -1,4 +1,5 @@
-const Restaurant = require('../models/restaurant');
+const mongoose = require('mongoose');
+const RestaurantLinks = require('../models/restaurant-links');
 const https = require('https')
 const config = require('../../config/config.json');
 const fs = require('fs');
@@ -119,16 +120,44 @@ class RestaurantsRunnerService {
                                         console.log("restaurantCount:" + restaurantCount);
 
                                         if (bUrlsOk) {
+                                            // Database save operations
 
-                                            // Database operations to do ...
+                                
+                                            let newRestaurantLinks = new RestaurantLinks({
+                                                _id: new mongoose.Types.ObjectId(),
+                                                parent_restaurants_url: base_uri,
+                                                restaurant_urls: urls_object
+                                            });
 
+                                            newRestaurantLinks.save((err, result) => {
+                                                console.log(result);
+                                                console.log(err);
+                                                if (err) {
+                                                    throw err;
+                                                }
+                                                
+                                            });
 
-                                            restaurantsResultObj.code = "001"
-                                            restaurantsResultObj.message = "Successfull";
                                             restaurantsResultObj.resultObject.restaurant_urls = urls_object;
-                                            resolve(restaurantsResultObj);
-                                        }
 
+
+                                            /*
+                                                //.exec()
+                                                .then(DbRecord => {
+                                                    console.log("db ok");
+                                                    restaurantsResultObj.code = "001"
+                                                    restaurantsResultObj.message = "Successfull";
+                                                    resolve(restaurantsResultObj);
+                                                })
+                                                .catch(err => {
+                                                    console.log("db not ok");
+                                                    restaurantsResultObj.code = "004"
+                                                    restaurantsResultObj.message = err.message;
+                                                    restaurantsResultObj.resultObject.restaurant_urls = []
+                                                    reject(restaurantsResultObj);
+                                                });
+                                                */
+                                        }
                                     } else {
                                         restaurantsResultObj.code = "004"
                                         restaurantsResultObj.message = "An error occured in html format as [dom]";
