@@ -13,7 +13,6 @@ const options = {
 };
 
 var totalData = "";
-const req;
 
 const req = https.request(options, res => {
     console.log("statusCode:" + res.statusCode);

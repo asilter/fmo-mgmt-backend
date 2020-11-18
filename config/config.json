@@ -3,7 +3,7 @@
         "DB_PW": "9820054",
         "PRGY_LOGIN_SECRET_KEY": "FMO_LOGIN_SECRET_KEY",
         "PRGY_LOGIN_REFRESH_KEY": "FMO_LOGIN_REFRESH_KEY",
-        "web_response_TA_tmp_file": "/Users/asilter/Documents/WORK/PROJECTS/fleet-menu-order/fmo-mgmt/source-code/fmo-mgmt-backend/assets/data/tripadvisor.html"
+        "web_response_TA_tmp_file": "/Users/asilter/Documents/WORK/PROJECTS/fleet-menu-order/fmo-mgmt/source-code/fmo-mgmt-backend/assets/data"
     },
     "QA": {
         "DB_PW": "9820054",

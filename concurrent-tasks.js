@@ -9,12 +9,11 @@ function generateTasks() {
     while (count) {
         tasks.push(done => {
             setTimeout(() => {
-                // 1 ile 10 aralığı (ms)
+                // 1 between 10 interval in ms
                 interval = Math.floor(Math.random() * 10) + 1;
-                // (dk)
+                // minutes transformation
                 interval = interval * 1000 * 60;
-                //interval = Math.random() * 100000;
-                console.log("interval : " + interval / 1000 /60 + " dk");
+                console.log("interval : " + interval / 1000 / 60 + " dk");
                 work().then(() => {
                     done();
                 });
