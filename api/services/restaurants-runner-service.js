@@ -13,21 +13,37 @@ class RestaurantsRunnerService {
         console.log("RestaurantsRunnerService initialized");
     }
 
-
-
+    testPromise(base_uri) {
+        return new Promise((resolve, reject) => {
+            let restaurantsResultObj = {
+                code: "",
+                message: "",
+                resultObject: []
+            }
+            this.calculateHostnamePath(base_uri).then(resultRequest => {
+                let _protocol = resultRequest.protocol;
+                let _port = resultRequest.port;
+                const options = {
+                    hostname: resultRequest.hostname,
+                    port: resultRequest.port,
+                    path: resultRequest.path,
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'text/html'
+                    }
+                };
+                restaurantsResultObj.resultObject = options;
+                console.log("_protocol:" + _protocol);
+                resolve(true);
+            });
+        });
+    }
 
     // Lists restaurants' links of html page
     listRestaurants(base_uri) {
 
         // Listing page restaurants
         return new Promise((resolve, reject) => {
-            /**
-             * Code:
-             * 001 : Restaurant Found
-             * 002 : 
-             * 003 : Restaurant Not Found
-             * 004 : An Error Occured
-             */
 
             let restaurantsResultObj = {
                 code: "",
@@ -51,7 +67,6 @@ class RestaurantsRunnerService {
                 };
 
                 restaurantsResultObj.resultObject = options;
-
 
                 // Handle web request
                 this.makeWebRequest(restaurantsResultObj).then(taskResult => {
@@ -122,41 +137,32 @@ class RestaurantsRunnerService {
                                         if (bUrlsOk) {
                                             // Database save operations
 
-                                
-                                            let newRestaurantLinks = new RestaurantLinks({
-                                                _id: new mongoose.Types.ObjectId(),
-                                                parent_restaurants_url: base_uri,
-                                                restaurant_urls: urls_object
-                                            });
 
-                                            newRestaurantLinks.save((err, result) => {
-                                                console.log(result);
-                                                console.log(err);
-                                                if (err) {
-                                                    throw err;
-                                                }
-                                                
-                                            });
+                                            // database connection
+                                            console.log("database operations");
+
+                                            //mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', null);
 
                                             restaurantsResultObj.resultObject.restaurant_urls = urls_object;
 
-
-                                            /*
-                                                //.exec()
-                                                .then(DbRecord => {
-                                                    console.log("db ok");
+                                            RestaurantLinks.insertMany(restaurantsResultObj.resultObject)
+                                                .then(insertRestaurantLinksResult => {
+                                                    //console.log(insertRestaurantLinksResult);
                                                     restaurantsResultObj.code = "001"
-                                                    restaurantsResultObj.message = "Successfull";
+                                                    restaurantsResultObj.message = "Operation Successful";
+                                                    restaurantsResultObj.resultObject = restaurantsResultObj;
+                                                    console.log("before resolve");
                                                     resolve(restaurantsResultObj);
-                                                })
-                                                .catch(err => {
-                                                    console.log("db not ok");
+                                                    console.log("after resolve");
+                                                }).catch(insertRestaurantLinksError => {
+                                                    console.log(insertRestaurantLinksError);
                                                     restaurantsResultObj.code = "004"
-                                                    restaurantsResultObj.message = err.message;
-                                                    restaurantsResultObj.resultObject.restaurant_urls = []
+                                                    restaurantsResultObj.message = insertRestaurantLinksError.message;
+                                                    restaurantsResultObj.resultObject = restaurantsResultObj;
                                                     reject(restaurantsResultObj);
+                                                }).finally(() => {
+                                                    console.log("insert finally");
                                                 });
-                                                */
                                         }
                                     } else {
                                         restaurantsResultObj.code = "004"
@@ -178,11 +184,7 @@ class RestaurantsRunnerService {
 
                     reject(restaurantsResultObj);
                 });
-
             });
-
-
-
         });
     }
 
