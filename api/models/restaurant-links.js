@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const restaurantLinkSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
+    created_time: Date,
     parent_restaurants_url: String,
     restaurant_urls: [
         {

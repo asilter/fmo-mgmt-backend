@@ -13,7 +13,8 @@ class RestaurantsRunnerService {
         console.log("RestaurantsRunnerService initialized");
     }
 
-    testPromise(base_uri) {
+    // Lists restaurants' links of html page
+    listRestaurants(base_uri) {
         return new Promise((resolve, reject) => {
             let restaurantsResultObj = {
                 code: "",
@@ -34,71 +35,34 @@ class RestaurantsRunnerService {
                 };
                 restaurantsResultObj.resultObject = options;
                 console.log("_protocol:" + _protocol);
-                resolve(true);
-            });
-        });
-    }
-
-    // Lists restaurants' links of html page
-    listRestaurants(base_uri) {
-
-        // Listing page restaurants
-        return new Promise((resolve, reject) => {
-
-            let restaurantsResultObj = {
-                code: "",
-                message: "",
-                resultObject: []
-            }
-
-            this.calculateHostnamePath(base_uri).then(resultRequest => {
-
-                let _protocol = resultRequest.protocol;
-                let _port = resultRequest.port;
-
-                const options = {
-                    hostname: resultRequest.hostname,
-                    port: resultRequest.port,
-                    path: resultRequest.path,
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'text/html'
-                    }
-                };
-
-                restaurantsResultObj.resultObject = options;
 
                 // Handle web request
                 this.makeWebRequest(restaurantsResultObj).then(taskResult => {
-                    //.log(JSON.stringify(taskResult));
-
-                    // Write html response to an html file      
-                    fs.writeFile(config.DEV.web_response_TA_tmp_file + "/tmp.html", taskResult.resultObject, function (err) {
-                        if (err) {
-
+                    fs.writeFile(config.DEV.web_response_TA_tmp_file + "/tmp.html", taskResult.resultObject, function (writeHtmlFileError) {
+                        if (writeHtmlFileError) {
+                            //console.log(writeHtmlFileError);
                             restaurantsResultObj.code = "004"
-                            restaurantsResultObj.message = err.message;
+                            restaurantsResultObj.message = writeHtmlFileError.message;
                             restaurantsResultObj.resultObject = [];
                             reject(restaurantsResultObj);
-
                         } else {
-
                             // Read html response html file  
                             fs.readFile(config.DEV.web_response_TA_tmp_file + "/tmp.html", 'utf8', function (readHtmlFileError, html) {
-                                if (err) {
-                                    //console.log(err);
+                                if (readHtmlFileError) {
+                                    //console.log(readHtmlFileError);
                                     restaurantsResultObj.code = "004"
                                     restaurantsResultObj.message = readHtmlFileError.message;
                                     restaurantsResultObj.resultObject = [];
                                     reject(restaurantsResultObj);
                                 } else {
-
+                                    console.log("file read ok");
                                     let _hostname = restaurantsResultObj.resultObject.hostname;
+
                                     restaurantsResultObj.resultObject = {
+                                        "created_time": "",
                                         "parent_restaurants_url": base_uri,
                                         "restaurant_urls": []
                                     };
-
                                     html = htmlclean(html);
                                     html = html.replace(/[\t\n\r]/gm, "");
                                     html = html.substring(html.indexOf("EATERY_SEARCH_RESULTS") - 9);
@@ -129,40 +93,48 @@ class RestaurantsRunnerService {
                                                 console.log("restaurant_uri:" + restaurant_uri);
                                                 urls_object.push({ "id": i, "uri": restaurant_uri });
                                                 lastRestaurant = restaurant_uri;
+                                                if (i == 0) bUrlsOk = true;
                                             }
-                                            if (i == 0) bUrlsOk = true;
                                         }
                                         console.log("restaurantCount:" + restaurantCount);
 
+                                        console.log("Some restaurant urls found:" + bUrlsOk);
                                         if (bUrlsOk) {
                                             // Database save operations
-
-
-                                            // database connection
                                             console.log("database operations");
-
-                                            //mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', null);
-
+                                            // Set variable to current date and time
+                                            const _now = new Date();
+                                            restaurantsResultObj.resultObject.created_time = _now;
                                             restaurantsResultObj.resultObject.restaurant_urls = urls_object;
 
-                                            RestaurantLinks.insertMany(restaurantsResultObj.resultObject)
-                                                .then(insertRestaurantLinksResult => {
-                                                    //console.log(insertRestaurantLinksResult);
-                                                    restaurantsResultObj.code = "001"
-                                                    restaurantsResultObj.message = "Operation Successful";
-                                                    restaurantsResultObj.resultObject = restaurantsResultObj;
-                                                    console.log("before resolve");
-                                                    resolve(restaurantsResultObj);
-                                                    console.log("after resolve");
-                                                }).catch(insertRestaurantLinksError => {
-                                                    console.log(insertRestaurantLinksError);
-                                                    restaurantsResultObj.code = "004"
-                                                    restaurantsResultObj.message = insertRestaurantLinksError.message;
-                                                    restaurantsResultObj.resultObject = restaurantsResultObj;
-                                                    reject(restaurantsResultObj);
-                                                }).finally(() => {
-                                                    console.log("insert finally");
-                                                });
+                                            mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', { useUnifiedTopology: true, useNewUrlParser: true });
+                                            const connection = mongoose.connection;
+                                            connection.once("open", function () {
+                                                console.log("Database connection established successfully");
+                                                RestaurantLinks.insertMany(restaurantsResultObj.resultObject)
+                                                    .then(insertRestaurantLinksResult => {
+                                                        //console.log(insertRestaurantLinksResult);
+                                                        restaurantsResultObj.code = "001"
+                                                        restaurantsResultObj.message = "Operation Successful";
+                                                        restaurantsResultObj.resultObject = restaurantsResultObj;
+                                                        resolve(restaurantsResultObj);
+                                                    }).catch(insertRestaurantLinksError => {
+                                                        console.log(insertRestaurantLinksError);
+                                                        restaurantsResultObj.code = "004"
+                                                        restaurantsResultObj.message = insertRestaurantLinksError.message;
+                                                        restaurantsResultObj.resultObject = restaurantsResultObj;
+                                                        reject(restaurantsResultObj);
+                                                    }).finally(() => {
+                                                        connection.close(err => {
+                                                            if (err) {
+                                                                console.log("MongoDB database connection closing problem => err:" + JSON.stringify(err));
+                                                            } else {
+                                                                console.log("MongoDB database connection closed successfully");
+                                                            }
+                                                        });
+                                                    });
+
+                                            });
                                         }
                                     } else {
                                         restaurantsResultObj.code = "004"
@@ -175,7 +147,6 @@ class RestaurantsRunnerService {
                         }
                     });
                 }).catch(taskError => {
-
                     console.log(JSON.stringify(taskError));
 
                     restaurantsResultObj.code = "004";
@@ -183,11 +154,10 @@ class RestaurantsRunnerService {
                     restaurantsResultObj.resultObject = taskError;
 
                     reject(restaurantsResultObj);
-                });
+                });;
             });
         });
     }
-
 
     makeWebRequest(requestOptions) {
 
