@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const RestaurantLinks = require('../models/restaurant-links');
 const https = require('https')
 const config = require('../../config/config.json');
+const StringUtils = require('../utils/string-utils');
 const fs = require('fs');
 var parse = require('html-dom-parser');
 var htmlclean = require('htmlclean');
@@ -38,7 +39,11 @@ class RestaurantsRunnerService {
 
                 // Handle web request
                 this.makeWebRequest(restaurantsResultObj).then(taskResult => {
-                    fs.writeFile(config.DEV.web_response_TA_tmp_file + "/tmp.html", taskResult.resultObject, function (writeHtmlFileError) {
+
+                    let dummyFileName = new StringUtils().generateAlphaNumericString(8).toUpperCase();
+                    console.log("dummyFileName:" + dummyFileName);
+
+                    fs.writeFile(config.DEV.web_response_TA_tmp_file + "/" + dummyFileName + ".html", taskResult.resultObject, function (writeHtmlFileError) {
                         if (writeHtmlFileError) {
                             //console.log(writeHtmlFileError);
                             restaurantsResultObj.code = "004"
@@ -47,12 +52,15 @@ class RestaurantsRunnerService {
                             reject(restaurantsResultObj);
                         } else {
                             // Read html response html file  
-                            fs.readFile(config.DEV.web_response_TA_tmp_file + "/tmp.html", 'utf8', function (readHtmlFileError, html) {
+                            fs.readFile(config.DEV.web_response_TA_tmp_file + "/" + dummyFileName + ".html", 'utf8', function (readHtmlFileError, html) {
                                 if (readHtmlFileError) {
                                     //console.log(readHtmlFileError);
                                     restaurantsResultObj.code = "004"
                                     restaurantsResultObj.message = readHtmlFileError.message;
                                     restaurantsResultObj.resultObject = [];
+                                    fs.unlink(config.DEV.web_response_TA_tmp_file + "/" + dummyFileName + ".html", (res) => {
+                                        console.log("file delete ok => res:" + res);
+                                    });
                                     reject(restaurantsResultObj);
                                 } else {
                                     console.log("file read ok");
@@ -117,12 +125,18 @@ class RestaurantsRunnerService {
                                                         restaurantsResultObj.code = "001"
                                                         restaurantsResultObj.message = "Operation Successful";
                                                         restaurantsResultObj.resultObject = restaurantsResultObj;
+                                                        fs.unlink(config.DEV.web_response_TA_tmp_file + "/" + dummyFileName + ".html", (res) => {
+                                                            console.log("file delete ok => res:" + res);
+                                                        });
                                                         resolve(restaurantsResultObj);
                                                     }).catch(insertRestaurantLinksError => {
                                                         console.log(insertRestaurantLinksError);
                                                         restaurantsResultObj.code = "004"
                                                         restaurantsResultObj.message = insertRestaurantLinksError.message;
                                                         restaurantsResultObj.resultObject = restaurantsResultObj;
+                                                        fs.unlink(config.DEV.web_response_TA_tmp_file + "/" + dummyFileName + ".html", (res) => {
+                                                            console.log("file delete ok => res:" + res);
+                                                        });
                                                         reject(restaurantsResultObj);
                                                     }).finally(() => {
                                                         connection.close(err => {
@@ -140,6 +154,9 @@ class RestaurantsRunnerService {
                                         restaurantsResultObj.code = "004"
                                         restaurantsResultObj.message = "An error occured in html format as [dom]";
                                         restaurantsResultObj.resultObject = [];
+                                        fs.unlink(config.DEV.web_response_TA_tmp_file + "/" + dummyFileName + ".html", (res) => {
+                                            console.log("file delete ok => res:" + res);
+                                        });
                                         reject(restaurantsResultObj);
                                     }
                                 }
@@ -148,11 +165,9 @@ class RestaurantsRunnerService {
                     });
                 }).catch(taskError => {
                     console.log(JSON.stringify(taskError));
-
                     restaurantsResultObj.code = "004";
                     restaurantsResultObj.message = "An error occured";
                     restaurantsResultObj.resultObject = taskError;
-
                     reject(restaurantsResultObj);
                 });;
             });
