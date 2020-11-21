@@ -28,13 +28,20 @@ fs.readFile('./assets/data/a-restaurant2.html', 'utf8', function (err, html) {
         address = dom[0].children[0].next.next.children[0].next.children[0].children[0].children[0].data;
         address = decodeHtml(address);
         console.log("Address\t:\t" + address);
-        email = dom[0].children[0].next.next.next.next.children[1].children[0].children[0].attribs['href'];
-        email = email.substring(email.indexOf("mailto:")+8);
-        email = email.substring(0, email.indexOf("?"));
+
+        if (dom[0].children[0].next.next.next.next.prev.children[1].children.length == 0) {
+            email = "N/A";
+        } else {
+            email = dom[0].children[0].next.next.next.next.prev.children[1].children[0].children[0].attribs['href'];
+            email = email.substring(email.indexOf("mailto:") + 7);
+            email = email.substring(0, email.indexOf("?"));
+        }
         console.log("E-Mail\t:\t" + email);
-        phone = dom[0].children[0].next.next.next.next.next.children[0].children[0].children[0].children[0].next.children[0].data;
+
+        phone = dom[0].children[0].next.next.next.next.prev.next.children[0].children[0].children[0].children[0].next.children[0].data;
         console.log("Phone\t:\t" + phone);
         
+
 
     }
 });

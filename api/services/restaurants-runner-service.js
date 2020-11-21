@@ -15,7 +15,7 @@ class RestaurantsRunnerService {
     }
 
     // Lists restaurants' links of html page
-    listRestaurants(base_uri) {
+    persistBaseUrlRestaurants(base_uri) {
         return new Promise((resolve, reject) => {
             let restaurantsResultObj = {
                 code: "",
