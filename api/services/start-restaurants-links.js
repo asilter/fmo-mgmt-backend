@@ -41,15 +41,24 @@ function getAddresses(taskRunnerOptions) {
 
 function generateTasks(taskRunnerOptions) {
     const tasks = [];
+    let num = 0;
     let interval;
     for (let i = 0; i < taskRunnerOptions.restaurant_uris.length; i++) {
         tasks.push(done => {
             setTimeout(() => {
-                // 1 between 10 interval in ms
-                interval = Math.floor(Math.random() * 10) + 1;
+                // 0 between 9
+                num = Math.floor(Math.random() * 10);
+                if(num < 3 ) {
+                    num = 3;
+                }
+                // between 30 and 90
+                num = num * 10;
                 // minutes transformation
-                interval = interval * 1000 * 60;
-                console.log("interval : " + interval / 1000 / 60 + " dk");
+                //interval = interval * 1000 * 60;
+                // seconds transformation
+                interval = num * 1000;
+                //console.log("interval : " + interval / 1000 / 60 + " dk");
+                console.log("interval : " + num + " sn");
                 task(taskRunnerOptions.restaurant_uris[i]).then(taskResult => {
                     console.log("Task Result : " + taskResult);
                     done();
@@ -75,7 +84,7 @@ function init(taskRunnerOptions) {
 
 let taskRunnerOptions = {
     "base_uri": "https://www.tripadvisor.com/Restaurants-g186338-London_England.html",
-    "taskCount": 2,
+    "taskCount": 200,
     "restaurant_uris": []
 }
 init(taskRunnerOptions);

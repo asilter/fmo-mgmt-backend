@@ -54,8 +54,6 @@ class RestaurantInfoRunnerService {
                         }
                     };
 
-
-
                     let name;
                     let address;
                     let email;
