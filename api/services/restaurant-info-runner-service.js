@@ -15,7 +15,7 @@ class RestaurantInfoRunnerService {
     }
 
     // Lists restaurants' links of html page
-    persistRestaurantInfo(base_uri) {
+    persistRestaurantInfo(restaurantParserOptions) {
         return new Promise((resolve, reject) => {
             let restaurantInfoResultObj = {
                 code: "",
@@ -23,11 +23,7 @@ class RestaurantInfoRunnerService {
                 resultObject: {}
             }
 
-
-
-            
-
-            this.calculateHostnamePath(base_uri).then(resultRequest => {
+            this.calculateHostnamePath(restaurantParserOptions.restaurant_url).then(resultRequest => {
                 let _protocol = resultRequest.protocol;
                 let _port = resultRequest.port;
                 const options = {
@@ -51,7 +47,7 @@ class RestaurantInfoRunnerService {
 
                     let restaurantInfo = {
                         "created_time": "",
-                        "restaurant_url": base_uri,
+                        "restaurant_url": restaurantParserOptions.restaurant_url,
                         "restaurant_info": {
                             "name": "",
                             "address": "",
@@ -113,7 +109,6 @@ class RestaurantInfoRunnerService {
                     console.log("E-Mail\t:\t" + email);
                     restaurantInfo.restaurant_info.email = email;
 
-
                     console.log("Phone\t:\t" + phone);
                     restaurantInfo.restaurant_info.phone = phone;
 
@@ -138,6 +133,7 @@ class RestaurantInfoRunnerService {
                                 resolve(restaurantInfoResultObj);
                             }).catch(insertRestaurantError => {
                                 //console.log(insertRestaurantError);
+                                console.log("HATA *** :" + JSON.stringify(restaurantParserOptions));
                                 restaurantInfoResultObj.code = "004"
                                 restaurantInfoResultObj.message = insertRestaurantError.message;
                                 restaurantInfoResultObj.resultObject = restaurantInfo;
@@ -210,7 +206,7 @@ class RestaurantInfoRunnerService {
         });
     }
 
-    //base_uri = "https://www.tripadvisor.com/Restaurants-g186338-London_England.html";
+    //base_uri = "https://www.tripadvisor.com/Restaurant_Review-g186338-d15021904-Reviews-The_Chelsea_Corner-London_England.html";
     calculateHostnamePath(base_uri) {
         return new Promise((resolve, reject) => {
             let address_and_path;
