@@ -27,8 +27,10 @@ function getAddresses(taskRunnerOptions) {
         let uri_dummy = "";
         let uri_dummy_result = "";
         let path_code = "";
-        taskRunnerOptions.restaurant_uris.push(taskRunnerOptions.base_uri);
-        for (let i = 0; i < taskRunnerOptions.taskCount; i++) {
+        if (taskRunnerOptions.startFrom == 0) {
+            taskRunnerOptions.restaurant_uris.push(taskRunnerOptions.base_uri);
+        }
+        for (let i = taskRunnerOptions.startFrom; i < taskRunnerOptions.startFrom + taskRunnerOptions.taskCount; i++) {
             uri_dummy = taskRunnerOptions.base_uri;
             path_code = uri_dummy.substring(uri_dummy.indexOf("/Restaurants-") + 13).substring(0, 7);
             uri_dummy_result = uri_dummy.substring(0, uri_dummy.indexOf(path_code) + 7);
@@ -48,7 +50,7 @@ function generateTasks(taskRunnerOptions) {
             setTimeout(() => {
                 // 0 between 9
                 num = Math.floor(Math.random() * 10);
-                if(num < 3 ) {
+                if (num < 3) {
                     num = 3;
                 }
                 // between 30 and 90
@@ -84,7 +86,8 @@ function init(taskRunnerOptions) {
 
 let taskRunnerOptions = {
     "base_uri": "https://www.tripadvisor.com/Restaurants-g186338-London_England.html",
-    "taskCount": 200,
+    "taskCount": 2,
+    "startFrom": 660,
     "restaurant_uris": []
 }
 init(taskRunnerOptions);
