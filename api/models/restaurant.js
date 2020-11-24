@@ -5,10 +5,12 @@ const restaurantSchema = mongoose.Schema({
     created_time: Date,
     restaurant_url: String,
     restaurant_info: {
+        city: String,
         name: String,
         address: String,
         email: String,
-        phone: String
+        phone: String,
+
     }
 });
 

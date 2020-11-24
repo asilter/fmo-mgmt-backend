@@ -6,6 +6,17 @@ const RestaurantLinks = require('../models/restaurant-links');
 
 
 
+/**
+ * 
+ * restaurantParserOptions:
+ * {
+        "city": taskRunnerOptions.city,
+        "parent_restaurants_url": dummyBlock.parent_restaurants_url,
+        "block_number": blockNumber,
+        "restaurant_url": dummyRestaurant.uri,
+        "restaurant_order": restaurantNumber
+    }
+ */
 function task(restaurantParserOptions) {
     return new Promise((resolve, reject) => {
         console.log("Working ...");
@@ -20,6 +31,23 @@ function task(restaurantParserOptions) {
     });
 }
 
+
+
+/**
+ * taskRunnerOptionsList
+ * [
+ *      {
+            "city": taskRunnerOptions.city,
+            "parent_restaurants_url": dummyBlock.parent_restaurants_url,
+            "block_number": blockNumber,
+            "restaurant_url": dummyRestaurant.uri,
+            "restaurant_order": restaurantNumber
+        },
+        {
+            ...
+        }
+    ]
+ * */
 function generateTasks(taskRunnerOptionsList) {
     // DB Operations : List Restaurant links 
     console.log("generateTasks ****** ");
@@ -28,7 +56,7 @@ function generateTasks(taskRunnerOptionsList) {
     let interval;
     let counter = 0;
 
-    for (var _taskRunnerOptions of taskRunnerOptionsList) {
+    for (let i = 0; i < taskRunnerOptionsList.length; i++) {
         tasks.push(done => {
             setTimeout(() => {
                 // 35 between 45 secs
@@ -45,9 +73,8 @@ function generateTasks(taskRunnerOptionsList) {
                 }
                 // seconds transformation
                 interval = num * 1000;
-                //console.log("interval : " + interval / 1000 / 60 + " dk");
                 console.log("interval : " + num + " sn");
-                task(_taskRunnerOptions).then(taskResult => {
+                task(taskRunnerOptionsList[i]).then(taskResult => {
                     console.log("Task Result : " + taskResult);
                     done();
                 }).catch(taskError => {
@@ -57,9 +84,6 @@ function generateTasks(taskRunnerOptionsList) {
             }, interval);
         });
         counter++;
-        if (counter == 1) {
-            break;
-        }
     }
     return tasks;
 }
@@ -70,12 +94,7 @@ function getAddresses(taskRunnerOptions) {
 
         let taskRunnerOptionsList = [];
 
-        let restaurantParserOptions = {
-            "parent_restaurants_url": "",
-            "block_number": -1,
-            "restaurant_url": "",
-            "restaurant_order": -1
-        }
+        
 
         mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', { useUnifiedTopology: true, useNewUrlParser: true });
         const connection = mongoose.connection;
@@ -85,25 +104,28 @@ function getAddresses(taskRunnerOptions) {
                 .exec()
                 .then(restaurantLinksResult => {
 
-
                     let blockNumber = 0;
                     let restaurantNumber = 0;
-
+                    let dummyBlock;
+                    let dummyRestaurant;
                     //console.log(JSON.stringify(restaurantLinksResult));
-                    for (var dummyBlock of restaurantLinksResult) {
-                        console.log(dummyBlock.parent_restaurants_url);
-                        restaurantParserOptions.parent_restaurants_url = dummyBlock.parent_restaurants_url;
-                        restaurantParserOptions.block_number = blockNumber;
-                        for (var dummyRestaurant of dummyBlock.restaurant_urls) {
-                            restaurantParserOptions.restaurant_url = dummyRestaurant.uri;
-                            restaurantParserOptions.restaurant_order = restaurantNumber;
-                            //console.log(JSON.stringify(restaurantParserOptions));
-                            taskRunnerOptionsList.push(restaurantParserOptions);
+                    for (var i = 0; i < restaurantLinksResult.length; i++) {
+                        dummyBlock = restaurantLinksResult[i];
+                        for (var j = 0; j < dummyBlock.restaurant_urls.length; j++) {
+                            dummyRestaurant = dummyBlock.restaurant_urls[j];
+                            taskRunnerOptionsList.push(
+                                {
+                                    "city": taskRunnerOptions.city,
+                                    "parent_restaurants_url": dummyBlock.parent_restaurants_url,
+                                    "block_number": blockNumber,
+                                    "restaurant_url": dummyRestaurant.uri,
+                                    "restaurant_order": restaurantNumber
+                                }
+                            );
                             restaurantNumber++;
                         }
                         blockNumber++;
                     }
-
                 }).catch(restaurantLinksError => {
                     console.log(JSON.stringify(restaurantLinksError));
                 }).finally(() => {
@@ -114,7 +136,7 @@ function getAddresses(taskRunnerOptions) {
                             console.log("MongoDB database connection closed successfully");
                         }
                     });
-                    console.log("after for ****** => taskRunnerOptionsList:" + taskRunnerOptionsList);
+                    //console.log("after for ****** => taskRunnerOptionsList:" + JSON.stringify(taskRunnerOptionsList));
                     resolve(taskRunnerOptionsList);
                 });
         });
@@ -125,14 +147,15 @@ function init() {
     const runner = new TaskRunner();
     runner.setConcurrency(1);
     getAddresses(taskRunnerOptions).then(result => {
-        console.log(JSON.stringify(result));
+        //console.log(" =========================> " + JSON.stringify(result));
         runner.addMultiple(generateTasks(result));
     });
 }
 
 let taskRunnerOptions = {
     "startFromBlock": 0,
-    "limit": 1
+    "limit": 10,
+    "city": "London"
 }
 
 init();

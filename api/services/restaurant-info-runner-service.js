@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
+var decode = require('decode-html');
 const RestaurantLinks = require('../models/restaurant-links');
 const Restaurant = require('../models/restaurant');
+const RestaurantErrorLog = require('../models/restaurant-error-log');
 const https = require('https')
 const config = require('../../config/config.json');
 var parse = require('html-dom-parser');
@@ -14,7 +16,17 @@ class RestaurantInfoRunnerService {
         console.log("RestaurantInfoRunnerService initialized");
     }
 
-    // Lists restaurants' links of html page
+
+    /**
+     * restaurantParserOptions:
+     * {
+            "city": taskRunnerOptions.city,
+            "parent_restaurants_url": dummyBlock.parent_restaurants_url,
+            "block_number": blockNumber,
+            "restaurant_url": dummyRestaurant.uri,
+            "restaurant_order": restaurantNumber
+        }
+     */
     persistRestaurantInfo(restaurantParserOptions) {
         return new Promise((resolve, reject) => {
             let restaurantInfoResultObj = {
@@ -49,6 +61,7 @@ class RestaurantInfoRunnerService {
                         "created_time": "",
                         "restaurant_url": restaurantParserOptions.restaurant_url,
                         "restaurant_info": {
+                            "city": "",
                             "name": "",
                             "address": "",
                             "email": "",
@@ -56,16 +69,20 @@ class RestaurantInfoRunnerService {
                         }
                     };
 
+                    restaurantInfo.restaurant_info.city = restaurantParserOptions.city;
+
                     let name;
                     let address;
-                    let email;
+                    let email = "N/A";
                     let phone;
 
                     html = htmlclean(html);
                     html = html.replace(/[\t\n\r]/gm, "");
 
-                    let html2 = html.substring(html.indexOf("tr9HFDVo") - 12);
-                    let dom2 = parse(html2);
+                    //let html2 = html.substring(html.indexOf("tr9HFDVo") - 12);
+                    //let html2 = html.substring(html.indexOf("TABS_OVERVIEW") - 32);
+                    //let dom2 = parse(html2);
+
 
 
                     html = html.substring(html.indexOf("taplc_top_info_0") - 9);
@@ -74,7 +91,8 @@ class RestaurantInfoRunnerService {
                     // Name
                     //console.log(dom[0].children[0].children[0].children[0].children[0].children[0].data);
                     name = dom[0].children[0].children[0].children[0].children[0].children[0].data
-                    name = decodeHtml(name);
+                    //name = decodeHtml(name);
+                    name = decode(name);
                     console.log("Name\t:\t" + name);
                     restaurantInfo.restaurant_info.name = name;
 
@@ -82,35 +100,45 @@ class RestaurantInfoRunnerService {
                     // Address
                     html = html.substring(html.indexOf("xAOpeG9l") - 12);
                     dom = parse(html);
-                    address = dom[0].children[0].next.next.children[0].next.children[0].children[0].children[0].data;
+                    let addressNode = dom[0].children[0].next.next.children[0].next.children[0].children[0].children[0];
+                    address = addressNode.data;
                     address = decodeHtml(address);
                     console.log("Address\t:\t" + address);
                     restaurantInfo.restaurant_info.address = address;
 
 
-                    //console.log(dom2[0].children[0].children[2].next.next.children[0].children[0].children[3].next.next.children[1].children[0].children[0].attribs["href"]);
-                    let emailNodeControl = dom2[0].children[0].children[2].next.next.children[0].children[0].children[3].next.next.next.attribs["class"];
-                    if (emailNodeControl == "_105c0u5l") {
-                        //console.log("email var");
-                        email = dom2[0].children[0].children[2].next.next.children[0].children[0].children[3].next.next.children[1].children[0].children[0].attribs["href"];
+                    // ANA NODE xAOpeG9l : addressNode.parent.parent.parent.parent.parent
+
+                    let html3 = html.substring(html.indexOf("_105c0u5l") - 12);
+                    let dom3 = parse(html3);
+                    //console.log("CHILDREN 0    ****************************************************");
+                    let emailNode;
+                    emailNode = dom3[0].children[0].next;
+                    //console.log(emailNode);
+                    if (emailNode.children.length > 0) {
+                        //console.log(emailNode.children[0]);
+                        email = emailNode.children[0].children[0].attribs["href"];
                         email = email.substring(email.indexOf("mailto:") + 7);
                         email = email.substring(0, email.indexOf("?"));
-
-                        // Phone
-                        phone = dom2[0].children[0].children[2].next.next.children[0].children[0].children[3].next.next.next.children[0].children[0].attribs["href"];
-                        phone = phone.substring(phone.indexOf("tel:") + 4);
-                    } else {
-                        //console.log("email yok");
-                        email = "N/A";
-                        // Phone
-                        phone = dom2[0].children[0].children[2].next.next.children[0].children[0].children[3].next.next.children[0].children[0].attribs["href"];
-                        phone = phone.substring(phone.indexOf("tel:") + 4);
                     }
+                    //console.log("CHILDREN 0    ****************************************************");
                     console.log("E-Mail\t:\t" + email);
                     restaurantInfo.restaurant_info.email = email;
 
+                    dom3 = null;
+
+                    // Second _105c0u5l : addressNode.parent.parent.parent.parent.parent.children[4].next.next
+                    /* 
+                     let phoneNode;
+                     phoneNode = addressNode.parent.parent.parent.parent.parent.children[4].next.next;
+                     phone = phoneNode.children[0].children[0].attribs["href"];
+                     phone = phone.substring(phone.indexOf("tel:") + 4);
+                     */
+                    phone = "N/A";
                     console.log("Phone\t:\t" + phone);
                     restaurantInfo.restaurant_info.phone = phone;
+
+                    dom = null;
 
                     // Database save operations
                     console.log("database operations");
@@ -150,9 +178,42 @@ class RestaurantInfoRunnerService {
                     });
                 }).catch(taskError => {
                     console.log(JSON.stringify(taskError));
+
+                    mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', { useUnifiedTopology: true, useNewUrlParser: true });
+                    const connection = mongoose.connection;
+                    connection.once("open", function () {
+                        console.log("Adding to database: " + JSON.stringify(restaurantParserOptions));
+                        RestaurantErrorLog.insertMany(restaurantParserOptions)
+                            .then(insertRestaurantErrorLogResult => {
+                                console.log("database log ok");
+                                //console.log(insertRestaurantErrorLogResult);
+                                restaurantInfoResultObj.code = "001"
+                                restaurantInfoResultObj.message = "Operation Successful";
+                                restaurantInfoResultObj.resultObject = restaurantParserOptions;
+                                resolve(restaurantInfoResultObj);
+                            }).catch(insertRestaurantErrorLogError => {
+                                console.log("database log error => insertRestaurantErrorLogError : " + JSON.stringify(insertRestaurantErrorLogError));
+                                //console.log(insertRestaurantErrorLogError);
+                                restaurantInfoResultObj.code = "004"
+                                restaurantInfoResultObj.message = insertRestaurantErrorLogError.message;
+                                restaurantInfoResultObj.resultObject = restaurantParserOptions;
+                                reject(restaurantInfoResultObj);
+                            }).finally(() => {
+                                connection.close(err => {
+                                    if (err) {
+                                        console.log("MongoDB database connection closing problem => err:" + JSON.stringify(err));
+                                    } else {
+                                        console.log("MongoDB database connection closed successfully");
+                                    }
+                                });
+                            });
+                    });
+
+
                     restaurantInfoResultObj.code = "004";
                     restaurantInfoResultObj.message = taskError.message;
                     restaurantInfoResultObj.resultObject = taskError;
+
                     reject(restaurantInfoResultObj);
                 });;
             });
