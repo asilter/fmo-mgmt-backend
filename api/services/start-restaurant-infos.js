@@ -19,7 +19,7 @@ const RestaurantLinks = require('../models/restaurant-links');
  */
 function task(restaurantParserOptions) {
     return new Promise((resolve, reject) => {
-        console.log("Working ...");
+        console.log("*\tWorking ...");
         const rirs = new RestaurantInfoRunnerService();
         rirs.persistRestaurantInfo(restaurantParserOptions).then(result => {
             //console.log("result:" + result);
@@ -48,117 +48,119 @@ function task(restaurantParserOptions) {
         }
     ]
  * */
-function generateTasks(taskRunnerOptionsList) {
+function generateTasks(taskRunnerOptionsList, connection) {
     // DB Operations : List Restaurant links 
     //console.log("generateTasks ****** ");
     const tasks = [];
     let num = 0;
     let interval;
     let counter = 0;
-
-
-    mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', { useUnifiedTopology: true, useNewUrlParser: true });
-    const connection = mongoose.connection;
-    connection.once("open", function () {
-        console.log("database connection opened :)");
-        for (let i = 0; i < taskRunnerOptionsList.length; i++) {
-            tasks.push(done => {
-                setTimeout(() => {
-                    // 35 between 45 secs
-                    num = Math.ceil(Math.random() * 100);
-                    num = num - 3;
-                    if (num < 35) {
-                        while (num < 35) {
-                            num = num + 10;
-                        }
-                    } else {
-                        while (num > 45) {
-                            num = num - 10;
-                        }
+    for (let i = 0; i < taskRunnerOptionsList.length; i++) {
+        tasks.push(done => {
+            setTimeout(() => {
+                // 35 between 45 secs
+                num = Math.ceil(Math.random() * 100);
+                num = num - 3;
+                if (num < 35) {
+                    while (num < 35) {
+                        num = num + 10;
                     }
-                    // seconds transformation
-                    interval = num * 1000;
+                } else {
+                    while (num > 45) {
+                        num = num - 10;
+                    }
+                }
+                // seconds transformation
+                interval = num * 1000;
 
+                console.log("****************************************");
+                console.log("*\t" + taskRunnerOptionsList[i].startPage + " to " + taskRunnerOptionsList[i].endPage + "\t");
+                console.log("*\tNext Request : After " + num + " secs");
+                task(taskRunnerOptionsList[i]).then(taskResult => {
+                    //console.log("Task Result : " + taskResult);
+                    console.log("*\t" + (taskRunnerOptionsList.length - i) + " items left!\t");
                     console.log("****************************************");
-                    console.log("*\t" + restaurantParserOptions.startPage + " to " + restaurantParserOptions.endPage + "\t");
-                    console.log("*\tNext Request : After " + num + " secs");
-                    task(taskRunnerOptionsList[i]).then(taskResult => {
-                        //console.log("Task Result : " + taskResult);
-                        console.log("*\t" + (taskRunnerOptionsList.length - i) + " items left!\t");
-                        console.log("****************************************");
-                        if (i == taskRunnerOptionsList.length - 1) {
-                            connection.close(err => {
-                                if (err) {
-                                    console.log("Database connection closing problem => err:" + JSON.stringify(err));
-                                } else {
-                                    console.log("Database connection closed :)");
-                                }
-                            });
-                        }
-                        done();
-                    }).catch(taskError => {
-                        console.log("Task Error : " + JSON.stringify(taskError));
-                        done();
-                    });
-                }, interval);
-            });
-            counter++;
-        }
-        return tasks;
-    });
+                    if (i == taskRunnerOptionsList.length - 1) {
+                        connection.close(err => {
+                            if (err) {
+                                console.log("Database connection closing problem => err:" + JSON.stringify(err));
+                            } else {
+                                console.log("Database connection closed :)");
+                            }
+                        });
+                    }
+                    done();
+                }).catch(taskError => {
+                    console.log("Task Error : " + JSON.stringify(taskError));
+                    done();
+                });
+            }, interval);
+        });
+        counter++;
+    }
+    return tasks;
+
 }
 
 //https://www.tripadvisor.com.tr/Restaurants-g186338-oa30-London_England.html
 function getAddresses(taskRunnerOptions) {
     return new Promise((resolve, reject) => {
         let taskRunnerOptionsList = [];
+
+        /*
         mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', { useUnifiedTopology: true, useNewUrlParser: true });
         const connection = mongoose.connection;
         connection.once("open", function () {
             console.log("database connection opened");
-            RestaurantLinks.find({}).skip(taskRunnerOptions.startFromBlock).limit(taskRunnerOptions.limit)
-                .exec()
-                .then(restaurantLinksResult => {
-                    let blockNumber = 0;
-                    let restaurantNumber = 0;
-                    let dummyBlock;
-                    let dummyRestaurant;
-                    //console.log(JSON.stringify(restaurantLinksResult));
-                    for (var i = 0; i < restaurantLinksResult.length; i++) {
-                        dummyBlock = restaurantLinksResult[i];
-                        for (var j = 0; j < dummyBlock.restaurant_urls.length; j++) {
-                            dummyRestaurant = dummyBlock.restaurant_urls[j];
-                            taskRunnerOptionsList.push(
-                                {
-                                    "city": taskRunnerOptions.city,
-                                    "parent_restaurants_url": dummyBlock.parent_restaurants_url,
-                                    "block_number": blockNumber,
-                                    "restaurant_url": dummyRestaurant.uri,
-                                    "restaurant_order": restaurantNumber,
-                                    "startPage": taskRunnerOptions.startFromBlock,
-                                    "endPage": taskRunnerOptions.startFromBlock + taskRunnerOptions.limit
-                                }
-                            );
-                            restaurantNumber++;
-                        }
-                        blockNumber++;
+            */
+        RestaurantLinks.find({}).skip(taskRunnerOptions.startFromBlock).limit(taskRunnerOptions.limit)
+            .exec()
+            .then(restaurantLinksResult => {
+                let blockNumber = taskRunnerOptions.startFromBlock;
+                let restaurantNumber = 0;
+                let dummyBlock;
+                let dummyRestaurant;
+                //console.log(JSON.stringify(restaurantLinksResult));
+                for (var i = 0; i < restaurantLinksResult.length; i++) {
+                    dummyBlock = restaurantLinksResult[i];
+                    for (var j = 0; j < dummyBlock.restaurant_urls.length; j++) {
+                        dummyRestaurant = dummyBlock.restaurant_urls[j];
+                        taskRunnerOptionsList.push(
+                            {
+                                "city": taskRunnerOptions.city,
+                                "parent_restaurants_url": dummyBlock.parent_restaurants_url,
+                                "block_number": blockNumber,
+                                "restaurant_url": dummyRestaurant.uri,
+                                "restaurant_order": restaurantNumber,
+                                "startPage": taskRunnerOptions.startFromBlock,
+                                "endPage": taskRunnerOptions.startFromBlock + taskRunnerOptions.limit
+                            }
+                        );
+                        restaurantNumber++;
                     }
-                }).catch(restaurantLinksError => {
-                    console.log(JSON.stringify(restaurantLinksError));
-                }).finally(() => {
-                    connection.close(err => {
-                        if (err) {
-                            console.log("Database connection closing problem => err:" + JSON.stringify(err));
-                        } else {
-                            console.log("Database connection closed successfully");
-                        }
-                    });
-                    //console.log("after for ****** => taskRunnerOptionsList:" + JSON.stringify(taskRunnerOptionsList));
-                    resolve(taskRunnerOptionsList);
-                });
+                    blockNumber++;
+                }
+                resolve(taskRunnerOptionsList);
+            }).catch(restaurantLinksError => {
+                console.log(JSON.stringify(restaurantLinksError));
+            });
+        /*
+        .finally(() => {
+            connection.close(err => {
+                if (err) {
+                    console.log("Database connection closing problem => err:" + JSON.stringify(err));
+                } else {
+                    console.log("Database connection closed successfully");
+                }
+            });
+            //console.log("after for ****** => taskRunnerOptionsList:" + JSON.stringify(taskRunnerOptionsList));
+            resolve(taskRunnerOptionsList);
         });
+        */
+
     });
 }
+
 
 let taskRunnerOptions = {
     //"startFromBlock": 40,
@@ -169,15 +171,26 @@ let taskRunnerOptions = {
 }
 
 function init() {
+
+    mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', { useUnifiedTopology: true, useNewUrlParser: true });
+    const connection = mongoose.connection;
+
     const runner = new TaskRunner();
     runner.setConcurrency(1);
-    getAddresses(taskRunnerOptions).then(result => {
-        //console.log(" =========================> " + JSON.stringify(result));
-        runner.addMultiple(generateTasks(result));
-    });
-}
-//init();
 
+    //connection.once("open", function () {
+    //console.log("database connection opened");
+    getAddresses(taskRunnerOptions).then(result => {
+        console.log("result ok");
+        //console.log(" =========================> " + JSON.stringify(result));
+        runner.addMultiple(generateTasks(result, connection));
+        console.log("after add multiple");
+    });
+    //});
+}
+init();
+
+/*
 module.exports.init2 = function () {
     const runner = new TaskRunner();
     runner.setConcurrency(1);
@@ -186,3 +199,4 @@ module.exports.init2 = function () {
         runner.addMultiple(generateTasks(result));
     });
 }
+*/

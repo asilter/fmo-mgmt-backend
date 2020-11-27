@@ -13,7 +13,7 @@ var decodeHtml = require('decode-html');
 class RestaurantInfoRunnerService {
 
     constructor() {
-        console.log("RestaurantInfoRunnerService initialized");
+        console.log("*\tRestaurantInfoRunnerService initialized");
     }
 
 
@@ -95,7 +95,7 @@ class RestaurantInfoRunnerService {
                     name = dom[0].children[0].children[0].children[0].children[0].children[0].data
                     //name = decodeHtml(name);
                     name = decode(name);
-                    console.log("Name\t:\t" + name);
+                    console.log("*\tName\t:\t" + name);
                     restaurantInfo.restaurant_info.name = name;
 
 
@@ -105,7 +105,7 @@ class RestaurantInfoRunnerService {
                     let addressNode = dom[0].children[0].next.next.children[0].next.children[0].children[0].children[0];
                     address = addressNode.data;
                     address = decodeHtml(address);
-                    console.log("Address\t:\t" + address);
+                    console.log("*\tAddress\t:\t" + address);
                     restaurantInfo.restaurant_info.address = address;
 
 
@@ -124,7 +124,7 @@ class RestaurantInfoRunnerService {
                         email = email.substring(0, email.indexOf("?"));
                     }
                     //console.log("CHILDREN 0    ****************************************************");
-                    console.log("E-Mail\t:\t" + email);
+                    console.log("*\tE-Mail\t:\t" + email);
                     restaurantInfo.restaurant_info.email = email;
 
                     dom3 = null;
@@ -137,18 +137,19 @@ class RestaurantInfoRunnerService {
                      phone = phone.substring(phone.indexOf("tel:") + 4);
                      */
                     phone = "N/A";
-                    console.log("Phone\t:\t" + phone);
+                    console.log("*\tPhone\t:\t" + phone);
                     restaurantInfo.restaurant_info.phone = phone;
 
                     dom = null;
 
                     // Database save operations
-                    console.log("database operations");
+                    //console.log("database operations");
                     // Set variable to current date and time
                     const _now = new Date();
                     restaurantInfo.created_time = _now;
 
-                    console.log(JSON.stringify(restaurantInfo));
+                    console.log("*\tRestaurant Info : ");
+                    console.log("*\t" + JSON.stringify(restaurantInfo));
 
                     //mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', { useUnifiedTopology: true, useNewUrlParser: true });
                     //const connection = mongoose.connection;
@@ -238,7 +239,7 @@ class RestaurantInfoRunnerService {
 
             //console.log("just before request => requestOptions:" + JSON.stringify(requestOptions));
             const req = https.request(requestOptions.resultObject, res => {
-                console.log("statusCode:" + res.statusCode);
+                console.log("*\tstatusCode:" + res.statusCode);
                 var totalData = "";
 
                 // Response Data Loop Event
