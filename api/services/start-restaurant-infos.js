@@ -56,41 +56,56 @@ function generateTasks(taskRunnerOptionsList) {
     let interval;
     let counter = 0;
 
-    for (let i = 0; i < taskRunnerOptionsList.length; i++) {
-        tasks.push(done => {
-            setTimeout(() => {
-                // 35 between 45 secs
-                num = Math.ceil(Math.random() * 100);
-                num = num - 3;
-                if (num < 35) {
-                    while (num < 35) {
-                        num = num + 10;
+
+    mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', { useUnifiedTopology: true, useNewUrlParser: true });
+    const connection = mongoose.connection;
+    connection.once("open", function () {
+        console.log("database connection opened :)");
+        for (let i = 0; i < taskRunnerOptionsList.length; i++) {
+            tasks.push(done => {
+                setTimeout(() => {
+                    // 35 between 45 secs
+                    num = Math.ceil(Math.random() * 100);
+                    num = num - 3;
+                    if (num < 35) {
+                        while (num < 35) {
+                            num = num + 10;
+                        }
+                    } else {
+                        while (num > 45) {
+                            num = num - 10;
+                        }
                     }
-                } else {
-                    while (num > 45) {
-                        num = num - 10;
-                    }
-                }
-                // seconds transformation
-                interval = num * 1000;
-                
-                console.log("****************************************");
-                console.log("*\t" + restaurantParserOptions.startPage + " to " + restaurantParserOptions.endPage + "\t");
-                console.log("*\tNext Request : After " + num + " secs");
-                task(taskRunnerOptionsList[i]).then(taskResult => {
-                    //console.log("Task Result : " + taskResult);
-                    console.log("*\t" + (taskRunnerOptionsList.length - i) + " items left!\t");
+                    // seconds transformation
+                    interval = num * 1000;
+
                     console.log("****************************************");
-                    done();
-                }).catch(taskError => {
-                    console.log("Task Error : " + JSON.stringify(taskError));
-                    done();
-                });
-            }, interval);
-        });
-        counter++;
-    }
-    return tasks;
+                    console.log("*\t" + restaurantParserOptions.startPage + " to " + restaurantParserOptions.endPage + "\t");
+                    console.log("*\tNext Request : After " + num + " secs");
+                    task(taskRunnerOptionsList[i]).then(taskResult => {
+                        //console.log("Task Result : " + taskResult);
+                        console.log("*\t" + (taskRunnerOptionsList.length - i) + " items left!\t");
+                        console.log("****************************************");
+                        if (i == taskRunnerOptionsList.length - 1) {
+                            connection.close(err => {
+                                if (err) {
+                                    console.log("Database connection closing problem => err:" + JSON.stringify(err));
+                                } else {
+                                    console.log("Database connection closed :)");
+                                }
+                            });
+                        }
+                        done();
+                    }).catch(taskError => {
+                        console.log("Task Error : " + JSON.stringify(taskError));
+                        done();
+                    });
+                }, interval);
+            });
+            counter++;
+        }
+        return tasks;
+    });
 }
 
 //https://www.tripadvisor.com.tr/Restaurants-g186338-oa30-London_England.html

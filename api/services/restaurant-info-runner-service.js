@@ -35,7 +35,7 @@ class RestaurantInfoRunnerService {
                 resultObject: {}
             }
 
-            
+
 
             this.calculateHostnamePath(restaurantParserOptions.restaurant_url).then(resultRequest => {
                 let _protocol = resultRequest.protocol;
@@ -150,66 +150,68 @@ class RestaurantInfoRunnerService {
 
                     console.log(JSON.stringify(restaurantInfo));
 
-                    mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', { useUnifiedTopology: true, useNewUrlParser: true });
-                    const connection = mongoose.connection;
-                    connection.once("open", function () {
-                        console.log("Database connection ok :)");
-                        Restaurant.insertMany(restaurantInfo)
-                            .then(insertRestaurantResult => {
-                                //console.log(insertRestaurantResult);
-                                restaurantInfoResultObj.code = "001"
-                                restaurantInfoResultObj.message = "Operation Successful";
-                                restaurantInfoResultObj.resultObject = restaurantInfo;
-                                resolve(restaurantInfoResultObj);
-                            }).catch(insertRestaurantError => {
-                                //console.log(insertRestaurantError);
-                                console.log("HATA *** :" + JSON.stringify(restaurantParserOptions));
-                                restaurantInfoResultObj.code = "004"
-                                restaurantInfoResultObj.message = insertRestaurantError.message;
-                                restaurantInfoResultObj.resultObject = restaurantInfo;
-                                reject(restaurantInfoResultObj);
-                            }).finally(() => {
-                                connection.close(err => {
-                                    if (err) {
-                                        console.log("Database connection closing problem => err:" + JSON.stringify(err));
-                                    } else {
-                                        console.log("Database connection closed :)");
-                                    }
-                                });
-                            });
-                    });
+                    //mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', { useUnifiedTopology: true, useNewUrlParser: true });
+                    //const connection = mongoose.connection;
+                    //connection.once("open", function () {
+                    //console.log("Database connection ok :)");
+                    Restaurant.insertMany(restaurantInfo)
+                        .then(insertRestaurantResult => {
+                            //console.log(insertRestaurantResult);
+                            restaurantInfoResultObj.code = "001"
+                            restaurantInfoResultObj.message = "Operation Successful";
+                            restaurantInfoResultObj.resultObject = restaurantInfo;
+                            resolve(restaurantInfoResultObj);
+                        }).catch(insertRestaurantError => {
+                            //console.log(insertRestaurantError);
+                            console.log("HATA *** :" + JSON.stringify(restaurantParserOptions));
+                            restaurantInfoResultObj.code = "004"
+                            restaurantInfoResultObj.message = insertRestaurantError.message;
+                            restaurantInfoResultObj.resultObject = restaurantInfo;
+                            reject(restaurantInfoResultObj);
+                        });
+                    //.finally(() => {
+                    //    connection.close(err => {
+                    //        if (err) {
+                    //            console.log("Database connection closing problem => err:" + JSON.stringify(err));
+                    //        } else {
+                    //            console.log("Database connection closed :)");
+                    //        }
+                    //    });
+                    //});
+                    //});
                 }).catch(taskError => {
                     console.log(JSON.stringify(taskError));
 
-                    mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', { useUnifiedTopology: true, useNewUrlParser: true });
-                    const connection = mongoose.connection;
-                    connection.once("open", function () {
-                        console.log("Adding to database: " + JSON.stringify(restaurantParserOptions));
-                        RestaurantErrorLog.insertMany(restaurantParserOptions)
-                            .then(insertRestaurantErrorLogResult => {
-                                console.log("database log ok");
-                                //console.log(insertRestaurantErrorLogResult);
-                                restaurantInfoResultObj.code = "001"
-                                restaurantInfoResultObj.message = "Operation Successful";
-                                restaurantInfoResultObj.resultObject = restaurantParserOptions;
-                                resolve(restaurantInfoResultObj);
-                            }).catch(insertRestaurantErrorLogError => {
-                                console.log("database log error => insertRestaurantErrorLogError : " + JSON.stringify(insertRestaurantErrorLogError));
-                                //console.log(insertRestaurantErrorLogError);
-                                restaurantInfoResultObj.code = "004"
-                                restaurantInfoResultObj.message = insertRestaurantErrorLogError.message;
-                                restaurantInfoResultObj.resultObject = restaurantParserOptions;
-                                reject(restaurantInfoResultObj);
-                            }).finally(() => {
-                                connection.close(err => {
-                                    if (err) {
-                                        console.log("MongoDB database connection closing problem => err:" + JSON.stringify(err));
-                                    } else {
-                                        console.log("MongoDB database connection closed successfully");
-                                    }
-                                });
-                            });
-                    });
+                    //mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', { useUnifiedTopology: true, useNewUrlParser: true });
+                    //const connection = mongoose.connection;
+                    //connection.once("open", function () {
+                    console.log("Adding to database: " + JSON.stringify(restaurantParserOptions));
+                    RestaurantErrorLog.insertMany(restaurantParserOptions)
+                        .then(insertRestaurantErrorLogResult => {
+                            console.log("database log ok");
+                            //console.log(insertRestaurantErrorLogResult);
+                            restaurantInfoResultObj.code = "001"
+                            restaurantInfoResultObj.message = "Operation Successful";
+                            restaurantInfoResultObj.resultObject = restaurantParserOptions;
+                            resolve(restaurantInfoResultObj);
+                        }).catch(insertRestaurantErrorLogError => {
+                            console.log("database log error => insertRestaurantErrorLogError : " + JSON.stringify(insertRestaurantErrorLogError));
+                            //console.log(insertRestaurantErrorLogError);
+                            restaurantInfoResultObj.code = "004"
+                            restaurantInfoResultObj.message = insertRestaurantErrorLogError.message;
+                            restaurantInfoResultObj.resultObject = restaurantParserOptions;
+                            reject(restaurantInfoResultObj);
+                        });
+                    //.finally(() => {
+                    //    connection.close(err => {
+                    //        if (err) {
+                    //            console.log("MongoDB database connection closing problem => err:" + JSON.stringify(err));
+                    //        } else {
+                    //            console.log("MongoDB database connection closed successfully");
+                    //        }
+                    //    });
+                    //});
+                    //});
 
 
                     restaurantInfoResultObj.code = "004";
