@@ -1,8 +1,9 @@
 {
-  "name": "fmo-mgmt-backend",
+  "name": "fmo_mgmt_backend",
   "version": "1.0.0",
   "description": "Fleet Menu Ordering Management Backend Application",
-  "main": "app.js",
+  "main": "api/services/start-restaurant-infos.js",
+  "bin": "bin.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

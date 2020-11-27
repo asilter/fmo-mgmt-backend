@@ -35,6 +35,8 @@ class RestaurantInfoRunnerService {
                 resultObject: {}
             }
 
+            
+
             this.calculateHostnamePath(restaurantParserOptions.restaurant_url).then(resultRequest => {
                 let _protocol = resultRequest.protocol;
                 let _port = resultRequest.port;
@@ -49,11 +51,11 @@ class RestaurantInfoRunnerService {
                 };
                 //console.log(options);
                 restaurantInfoResultObj.resultObject = options;
-                console.log("_protocol:" + _protocol);
+                //console.log("_protocol:" + _protocol);
 
                 // Handle web request
                 this.makeWebRequest(restaurantInfoResultObj).then(taskResult => {
-                    console.log("make web request result");
+                    //console.log("make web request result");
                     let html = taskResult.resultObject;
                     //console.log("html : " + html);
 
@@ -151,7 +153,7 @@ class RestaurantInfoRunnerService {
                     mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', { useUnifiedTopology: true, useNewUrlParser: true });
                     const connection = mongoose.connection;
                     connection.once("open", function () {
-                        console.log("Database connection established successfully");
+                        console.log("Database connection ok :)");
                         Restaurant.insertMany(restaurantInfo)
                             .then(insertRestaurantResult => {
                                 //console.log(insertRestaurantResult);
@@ -169,9 +171,9 @@ class RestaurantInfoRunnerService {
                             }).finally(() => {
                                 connection.close(err => {
                                     if (err) {
-                                        console.log("MongoDB database connection closing problem => err:" + JSON.stringify(err));
+                                        console.log("Database connection closing problem => err:" + JSON.stringify(err));
                                     } else {
-                                        console.log("MongoDB database connection closed successfully");
+                                        console.log("Database connection closed :)");
                                     }
                                 });
                             });
@@ -318,9 +320,9 @@ class RestaurantInfoRunnerService {
             _path_prefix_before_path_code = uriParams.path.substring(0, uriParams.path.indexOf(_path_code));
             _path_suffix_after_path_code = uriParams.path.substring(uriParams.path.indexOf(_path_code) + 7);
 
-            console.log("_path_prefix_before_path_code:" + _path_prefix_before_path_code);
-            console.log("_path_code:" + _path_code);
-            console.log("_path_suffix_after_path_code:" + _path_suffix_after_path_code);
+            //console.log("_path_prefix_before_path_code:" + _path_prefix_before_path_code);
+            //console.log("_path_code:" + _path_code);
+            //console.log("_path_suffix_after_path_code:" + _path_suffix_after_path_code);
 
             //console.log(JSON.stringify(uriParams));
 
