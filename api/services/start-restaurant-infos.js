@@ -75,6 +75,9 @@ function generateTasks(taskRunnerOptionsList, connection) {
 
                 console.log("****************************************");
                 console.log("*\tPage " + taskRunnerOptionsList[i].startPage + " to " + taskRunnerOptionsList[i].endPage + "\t");
+                console.log("*\Page(Block) Number : " + taskRunnerOptionsList[i].block_number);
+                console.log("*\Restaurant Order : " + taskRunnerOptionsList[i].restaurant_order);
+
                 console.log("*\tNext Request : After " + num + " secs");
                 task(taskRunnerOptionsList[i]).then(taskResult => {
                     //console.log("Task Result : " + taskResult);
