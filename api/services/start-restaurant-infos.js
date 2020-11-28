@@ -74,7 +74,7 @@ function generateTasks(taskRunnerOptionsList, connection) {
                 interval = num * 1000;
 
                 console.log("****************************************");
-                console.log("*\t" + taskRunnerOptionsList[i].startPage + " to " + taskRunnerOptionsList[i].endPage + "\t");
+                console.log("*\tPage " + taskRunnerOptionsList[i].startPage + " to " + taskRunnerOptionsList[i].endPage + "\t");
                 console.log("*\tNext Request : After " + num + " secs");
                 task(taskRunnerOptionsList[i]).then(taskResult => {
                     //console.log("Task Result : " + taskResult);
@@ -178,25 +178,16 @@ function init() {
     const runner = new TaskRunner();
     runner.setConcurrency(1);
 
-    //connection.once("open", function () {
-    //console.log("database connection opened");
     getAddresses(taskRunnerOptions).then(result => {
-        console.log("result ok");
-        //console.log(" =========================> " + JSON.stringify(result));
         runner.addMultiple(generateTasks(result, connection));
-        console.log("after add multiple");
     });
-    //});
 }
-init();
+//init();
 
-/*
-module.exports.init2 = function () {
-    const runner = new TaskRunner();
-    runner.setConcurrency(1);
-    getAddresses(taskRunnerOptions).then(result => {
-        //console.log(" =========================> " + JSON.stringify(result));
-        runner.addMultiple(generateTasks(result));
-    });
+
+module.exports.init2 = function (_startFromBlokParam, _limitParam, _city) {
+    taskRunnerOptions.startFromBlock = Number(_startFromBlokParam);
+    taskRunnerOptions.limit = Number(_limitParam);
+    taskRunnerOptions.city = _city;
+    init();
 }
-*/
