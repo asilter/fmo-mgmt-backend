@@ -55,18 +55,20 @@ function generateTasks(taskRunnerOptionsList, connection) {
     let num = 0;
     let interval;
     let counter = 0;
+    let minSec = 35;
+    let maxSec = 45;
     for (let i = 0; i < taskRunnerOptionsList.length; i++) {
         tasks.push(done => {
             setTimeout(() => {
-                // 35 between 45 secs
+                // minSec between maxSec secs
                 num = Math.ceil(Math.random() * 100);
                 num = num - 3;
-                if (num < 35) {
-                    while (num < 35) {
+                if (num < minSec) {
+                    while (num < minSec) {
                         num = num + 10;
                     }
                 } else {
-                    while (num > 45) {
+                    while (num > maxSec) {
                         num = num - 10;
                     }
                 }
@@ -75,8 +77,8 @@ function generateTasks(taskRunnerOptionsList, connection) {
 
                 console.log("****************************************");
                 console.log("*\tPage " + taskRunnerOptionsList[i].startPage + " to " + taskRunnerOptionsList[i].endPage + "\t");
-                console.log("*\Page(Block) Number : " + taskRunnerOptionsList[i].block_number);
-                console.log("*\Restaurant Order : " + taskRunnerOptionsList[i].restaurant_order);
+                console.log("*\tPage(Block) Number : " + taskRunnerOptionsList[i].block_number);
+                console.log("*\tRestaurant Order : " + taskRunnerOptionsList[i].restaurant_order);
 
                 console.log("*\tNext Request : After " + num + " secs");
                 task(taskRunnerOptionsList[i]).then(taskResult => {
@@ -142,6 +144,7 @@ function getAddresses(taskRunnerOptions) {
                         restaurantNumber++;
                     }
                     blockNumber++;
+                    restaurantNumber = 0;
                 }
                 resolve(taskRunnerOptionsList);
             }).catch(restaurantLinksError => {
