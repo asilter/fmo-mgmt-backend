@@ -1,6 +1,6 @@
 class StringUtils {
     constructor() {
-        console.log("StringUtils initialized");
+        //console.log("StringUtils initialized");
     }
     generateAlphaNumericStringAsync(length) {
         return new Promise((resolve, reject) => {

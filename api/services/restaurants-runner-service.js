@@ -11,7 +11,7 @@ var htmlclean = require('htmlclean');
 class RestaurantsRunnerService {
 
     constructor() {
-        console.log("RestaurantsRunnerService initialized");
+        //console.log("RestaurantsRunnerService initialized");
     }
 
     // Lists restaurants' links of html page
@@ -35,13 +35,13 @@ class RestaurantsRunnerService {
                     }
                 };
                 restaurantsResultObj.resultObject = options;
-                console.log("_protocol:" + _protocol);
+                //console.log("_protocol:" + _protocol);
 
                 // Handle web request
                 this.makeWebRequest(restaurantsResultObj).then(taskResult => {
 
                     let dummyFileName = new StringUtils().generateAlphaNumericString(8).toUpperCase();
-                    console.log("dummyFileName:" + dummyFileName);
+                    console.log("*\tdummyFileName:" + dummyFileName);
 
                     fs.writeFile(config.DEV.web_response_TA_tmp_file + "/" + dummyFileName + ".html", taskResult.resultObject, function (writeHtmlFileError) {
                         if (writeHtmlFileError) {
@@ -63,7 +63,7 @@ class RestaurantsRunnerService {
                                     });
                                     reject(restaurantsResultObj);
                                 } else {
-                                    console.log("file read ok");
+                                    console.log("*\tfile read ok");
                                     let _hostname = restaurantsResultObj.resultObject.hostname;
 
                                     restaurantsResultObj.resultObject = {
@@ -73,7 +73,7 @@ class RestaurantsRunnerService {
                                     };
                                     html = htmlclean(html);
                                     html = html.replace(/[\t\n\r]/gm, "");
-                                    html = html.substring(html.indexOf("EATERY_SEARCH_RESULTS") - 9);
+                                    html = html.substring(html.indexOf("EATERY_SEARCH_RESULTS") - 9); 
                                     let dom = parse(html);
                                     let list_item;
                                     let restaurant_uri;
@@ -83,33 +83,37 @@ class RestaurantsRunnerService {
                                     let lastRestaurant;
 
                                     if (1 == 1) {
+                                        //console.log("dom[0]:" + dom[0]);
                                         for (var i = 0; i < dom[0].children[1].children[0].children.length; i++) {
                                             list_item = dom[0].children[1].children[0].children[i];
                                             while (!list_item.attribs['data-test']) {
                                                 list_item = list_item.next;
                                             }
+                                            //console.log("list_item:"+list_item.children[0]);
+                                            //console.log(list_item.attribs['data-test']);
                                             if (list_item.attribs['data-test'] == "SL_list_item") {
-                                                restaurant_uri = _protocol + "://" + _hostname + ":" + _port + list_item.children[0].children[0].children[0].next.children[0].children[0].next.children[0].children[0].attribs['href'];
+                                                restaurant_uri = _protocol + "://" + _hostname + ":" + _port + list_item.children[0].children[0].children[0].children[0].next.children[0].children[0].next.children[0].children[0].attribs['href'];
                                             } else {
                                                 restaurant_uri = _protocol + "://" + _hostname + ":" + _port + list_item.children[0].children[0].children[0].next.children[0].children[0].children[0].children[0].attribs['href'];
                                             }
+                                            //console.log("restaurant_uri:" + restaurant_uri);
                                             if (lastRestaurant == restaurant_uri) {
                                                 continue;
                                             }
                                             if (restaurant_uri) {
                                                 restaurantCount++;
-                                                console.log("restaurant_uri:" + restaurant_uri);
+                                                //console.log("restaurant_uri:" + restaurant_uri);
                                                 urls_object.push({ "id": i, "uri": restaurant_uri });
                                                 lastRestaurant = restaurant_uri;
                                                 if (i == 0) bUrlsOk = true;
                                             }
                                         }
-                                        console.log("restaurantCount:" + restaurantCount);
+                                        console.log("*\trestaurantCount:" + restaurantCount);
 
-                                        console.log("Some restaurant urls found:" + bUrlsOk);
+                                        //console.log("*\tSome restaurant urls found:" + bUrlsOk);
                                         if (bUrlsOk) {
                                             // Database save operations
-                                            console.log("database operations");
+                                            //console.log("database operations");
                                             // Set variable to current date and time
                                             const _now = new Date();
                                             restaurantsResultObj.resultObject.created_time = _now;
@@ -118,7 +122,7 @@ class RestaurantsRunnerService {
                                             mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', { useUnifiedTopology: true, useNewUrlParser: true });
                                             const connection = mongoose.connection;
                                             connection.once("open", function () {
-                                                console.log("Database connection established successfully");
+                                                console.log("*\tDatabase connection established successfully");
                                                 RestaurantLinks.insertMany(restaurantsResultObj.resultObject)
                                                     .then(insertRestaurantLinksResult => {
                                                         //console.log(insertRestaurantLinksResult);
@@ -126,7 +130,7 @@ class RestaurantsRunnerService {
                                                         restaurantsResultObj.message = "Operation Successful";
                                                         restaurantsResultObj.resultObject = restaurantsResultObj;
                                                         fs.unlink(config.DEV.web_response_TA_tmp_file + "/" + dummyFileName + ".html", (res) => {
-                                                            console.log("file delete ok => res:" + res);
+                                                            //console.log("*\tfile delete ok => res:" + res);
                                                         });
                                                         resolve(restaurantsResultObj);
                                                     }).catch(insertRestaurantLinksError => {
@@ -135,15 +139,15 @@ class RestaurantsRunnerService {
                                                         restaurantsResultObj.message = insertRestaurantLinksError.message;
                                                         restaurantsResultObj.resultObject = restaurantsResultObj;
                                                         fs.unlink(config.DEV.web_response_TA_tmp_file + "/" + dummyFileName + ".html", (res) => {
-                                                            console.log("file delete ok => res:" + res);
+                                                            //console.log("*\tfile delete ok => res:" + res);
                                                         });
                                                         reject(restaurantsResultObj);
                                                     }).finally(() => {
                                                         connection.close(err => {
                                                             if (err) {
-                                                                console.log("MongoDB database connection closing problem => err:" + JSON.stringify(err));
+                                                                console.log("*\tDatabase connection closing problem => err:" + JSON.stringify(err));
                                                             } else {
-                                                                console.log("MongoDB database connection closed successfully");
+                                                                console.log("*\tDatabase connection closed successfully");
                                                             }
                                                         });
                                                     });
@@ -188,7 +192,7 @@ class RestaurantsRunnerService {
 
             //console.log("just before request => requestOptions:" + JSON.stringify(requestOptions));
             const req = https.request(requestOptions.resultObject, res => {
-                console.log("statusCode:" + res.statusCode);
+                console.log("*\tstatusCode:" + res.statusCode);
                 var totalData = "";
 
                 // Response Data Loop Event
@@ -268,13 +272,15 @@ class RestaurantsRunnerService {
 
             uriParams.path = address_and_path.substring(address_and_path.indexOf("/"));
 
-            _path_code = uriParams.path.substring(uriParams.path.indexOf("/Restaurants-") + 13).substring(0, 7);
+            //_path_code = uriParams.path.substring(uriParams.path.indexOf("/Restaurants-") + 13).substring(0, 7);
+            _path_code = uriParams.path.substring(uriParams.path.indexOf("/Restaurants-") + 13).substring(0, 6);
             _path_prefix_before_path_code = uriParams.path.substring(0, uriParams.path.indexOf(_path_code));
-            _path_suffix_after_path_code = uriParams.path.substring(uriParams.path.indexOf(_path_code) + 7);
+            //_path_suffix_after_path_code = uriParams.path.substring(uriParams.path.indexOf(_path_code) + 7);
+            _path_suffix_after_path_code = uriParams.path.substring(uriParams.path.indexOf(_path_code) + 6);
 
-            console.log("_path_prefix_before_path_code:" + _path_prefix_before_path_code);
-            console.log("_path_code:" + _path_code);
-            console.log("_path_suffix_after_path_code:" + _path_suffix_after_path_code);
+            //console.log("_path_prefix_before_path_code:" + _path_prefix_before_path_code);
+            //console.log("_path_code:" + _path_code);
+            //console.log("_path_suffix_after_path_code:" + _path_suffix_after_path_code);
 
             //console.log(JSON.stringify(uriParams));
 
