@@ -15,7 +15,7 @@ class RestaurantsRunnerService {
     }
 
     // Lists restaurants' links of html page
-    persistBaseUrlRestaurants(base_uri) {
+    persistBaseUrlRestaurants(base_uri, city) { 
         return new Promise((resolve, reject) => {
             let restaurantsResultObj = {
                 code: "",
@@ -69,6 +69,7 @@ class RestaurantsRunnerService {
                                     restaurantsResultObj.resultObject = {
                                         "created_time": "",
                                         "parent_restaurants_url": base_uri,
+                                        "city": city,
                                         "restaurant_urls": []
                                     };
                                     html = htmlclean(html);
@@ -118,6 +119,7 @@ class RestaurantsRunnerService {
                                             const _now = new Date();
                                             restaurantsResultObj.resultObject.created_time = _now;
                                             restaurantsResultObj.resultObject.restaurant_urls = urls_object;
+
 
                                             mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', { useUnifiedTopology: true, useNewUrlParser: true });
                                             const connection = mongoose.connection;

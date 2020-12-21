@@ -32,4 +32,5 @@ npm-debug.log*
 fmo_mgmt_backend-linux
 fmo_mgmt_backend-macos
 fmo_mgmt_backend-win.exe
-
+res-links-win.exe
+res-win.exe

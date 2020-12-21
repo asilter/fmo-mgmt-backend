@@ -111,7 +111,7 @@ function generateTasks(taskRunnerOptionsList, connection) {
 function getAddresses(taskRunnerOptions) {
     return new Promise((resolve, reject) => {
         let taskRunnerOptionsList = [];
-        let DBCityChangedStarttingPoint = 659;
+        //let DBCityChangedStarttingPoint = 659;
 
         /*
         mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', { useUnifiedTopology: true, useNewUrlParser: true });
@@ -119,11 +119,12 @@ function getAddresses(taskRunnerOptions) {
         connection.once("open", function () {
             console.log("database connection opened");
             */
-        RestaurantLinks.find({}).skip(DBCityChangedStarttingPoint + taskRunnerOptions.startFromBlock).limit(taskRunnerOptions.limit)
+        //RestaurantLinks.find({}).skip(DBCityChangedStarttingPoint + taskRunnerOptions.startFromBlock).limit(taskRunnerOptions.limit)
+        RestaurantLinks.find({ city: "Dubai" }).skip(taskRunnerOptions.startFromBlock).limit(taskRunnerOptions.limit)
             .exec()
             .then(restaurantLinksResult => {
                 //let blockNumber = taskRunnerOptions.startFromBlock;
-                let blockNumber = DBCityChangedStarttingPoint + taskRunnerOptions.startFromBlock;
+                let blockNumber = taskRunnerOptions.startFromBlock;
                 let restaurantNumber = 0;
                 let dummyBlock;
                 let dummyRestaurant;
