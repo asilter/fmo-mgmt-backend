@@ -35,8 +35,6 @@ class RestaurantInfoRunnerService {
                 resultObject: {}
             }
 
-
-
             this.calculateHostnamePath(restaurantParserOptions.restaurant_url).then(resultRequest => {
                 let _protocol = resultRequest.protocol;
                 let _port = resultRequest.port;
@@ -81,19 +79,11 @@ class RestaurantInfoRunnerService {
                     html = htmlclean(html);
                     html = html.replace(/[\t\n\r]/gm, "");
 
-                    //let html2 = html.substring(html.indexOf("tr9HFDVo") - 12);
-                    //let html2 = html.substring(html.indexOf("TABS_OVERVIEW") - 32);
-                    //let dom2 = parse(html2);
-
-
-
                     html = html.substring(html.indexOf("taplc_top_info_0") - 9);
                     let dom = parse(html);
 
                     // Name
-                    //console.log(dom[0].children[0].children[0].children[0].children[0].children[0].data);
                     name = dom[0].children[0].children[0].children[0].children[0].children[0].data
-                    //name = decodeHtml(name);
                     name = decode(name);
                     console.log("*\tName\t:\t" + name);
                     restaurantInfo.restaurant_info.name = name;

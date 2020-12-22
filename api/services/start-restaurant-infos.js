@@ -4,19 +4,6 @@ var TaskRunner = require('concurrent-tasks');
 const RestaurantInfoRunnerService = require('./restaurant-info-runner-service');
 const RestaurantLinks = require('../models/restaurant-links');
 
-
-
-/**
- * 
- * restaurantParserOptions:
- * {
-        "city": taskRunnerOptions.city,
-        "parent_restaurants_url": dummyBlock.parent_restaurants_url,
-        "block_number": blockNumber,
-        "restaurant_url": dummyRestaurant.uri,
-        "restaurant_order": restaurantNumber
-    }
- */
 function task(restaurantParserOptions) {
     return new Promise((resolve, reject) => {
         console.log("*\tWorking ...");
@@ -31,26 +18,8 @@ function task(restaurantParserOptions) {
     });
 }
 
-
-
-/**
- * taskRunnerOptionsList
- * [
- *      {
-            "city": taskRunnerOptions.city,
-            "parent_restaurants_url": dummyBlock.parent_restaurants_url,
-            "block_number": blockNumber,
-            "restaurant_url": dummyRestaurant.uri,
-            "restaurant_order": restaurantNumber
-        },
-        {
-            ...
-        }
-    ]
- * */
 function generateTasks(taskRunnerOptionsList, connection) {
     // DB Operations : List Restaurant links 
-    //console.log("generateTasks ****** ");
     const tasks = [];
     let num = 0;
     let interval;
@@ -111,16 +80,7 @@ function generateTasks(taskRunnerOptionsList, connection) {
 function getAddresses(taskRunnerOptions) {
     return new Promise((resolve, reject) => {
         let taskRunnerOptionsList = [];
-        //let DBCityChangedStarttingPoint = 659;
-
-        /*
-        mongoose.connect('mongodb+srv://asilter:' + config.DEV.DB_PW + '@cluster0-1re2a.mongodb.net/fmo-mgmt?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true', { useUnifiedTopology: true, useNewUrlParser: true });
-        const connection = mongoose.connection;
-        connection.once("open", function () {
-            console.log("database connection opened");
-            */
-        //RestaurantLinks.find({}).skip(DBCityChangedStarttingPoint + taskRunnerOptions.startFromBlock).limit(taskRunnerOptions.limit)
-        RestaurantLinks.find({ city: "Dubai" }).skip(taskRunnerOptions.startFromBlock).limit(taskRunnerOptions.limit)
+        RestaurantLinks.find({ city: taskRunnerOptions.city }).skip(taskRunnerOptions.startFromBlock).limit(taskRunnerOptions.limit)
             .exec()
             .then(restaurantLinksResult => {
                 //let blockNumber = taskRunnerOptions.startFromBlock;
@@ -153,20 +113,6 @@ function getAddresses(taskRunnerOptions) {
             }).catch(restaurantLinksError => {
                 console.log(JSON.stringify(restaurantLinksError));
             });
-        /*
-        .finally(() => {
-            connection.close(err => {
-                if (err) {
-                    console.log("Database connection closing problem => err:" + JSON.stringify(err));
-                } else {
-                    console.log("Database connection closed successfully");
-                }
-            });
-            //console.log("after for ****** => taskRunnerOptionsList:" + JSON.stringify(taskRunnerOptionsList));
-            resolve(taskRunnerOptionsList);
-        });
-        */
-
     });
 }
 
